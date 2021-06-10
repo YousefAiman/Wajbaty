@@ -1,7 +1,11 @@
 <resources>
     <string name="title_activity_maps">Map</string>
     <string name="app_name">Wajbitna</string>
+    <string name="create_an_account">Create an account</string>
+    <string name="sign_in">Sign in</string>
+    <string name="continue_as_guest">Continue as guest</string>
     <string name="confirm">Confirm</string>
     <string name="locate_your_restaurant">Locate Your Restaurant</string>
+    <string name="create_your_account">Create your account</string>
 
 </resources>

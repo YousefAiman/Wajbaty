@@ -3,7 +3,11 @@
 
     <string name="app_name">وجبتنا</string>
     <string name="title_activity_maps">Map</string>
+    <string name="create_an_account">إنشاء حساب</string>
+    <string name="sign_in">تسجيل دخول</string>
+    <string name="continue_as_guest">الدخول كضيف</string>
     <string name="confirm">Confirm</string>
     <string name="locate_your_restaurant">حدد موقع مطعمك</string>
+    <string name="create_your_account">أنشئ حسابك</string>
 
 </resources>
