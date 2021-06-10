@@ -4,5 +4,6 @@
     <string name="app_name">وجبتنا</string>
     <string name="title_activity_maps">Map</string>
     <string name="confirm">Confirm</string>
+    <string name="locate_your_restaurant">حدد موقع مطعمك</string>
 
 </resources>
