@@ -114,10 +114,10 @@ public class RestaurantLocationActivity extends AppCompatActivity
     }
 
     private void showProgressDialog() {
-        sweetAlertDialog = new
+/*        sweetAlertDialog = new
                 SweetAlertDialog(MapsActivity.this, SweetAlertDialog.PROGRESS_TYPE);
 
-        sweetAlertDialog.show();
+        sweetAlertDialog.show();*/
     }
 
 
