@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,6 +16,8 @@ import android.widget.Button;
 
 import com.developers.wajbaty.Fragments.ProgressDialogFragment;
 import com.developers.wajbaty.R;
+import com.developers.wajbaty.Utils.GeocoderUtil;
+import com.developers.wajbaty.Utils.LocationRequester;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -26,17 +29,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class RestaurantLocationActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleMap.OnMapClickListener, View.OnClickListener {
 
-    public static final int MAP_TYPE_CURRENT_LOCATION = 1, MAP_TYPE_MARK_LOCATION = 2;
-    private static final int
-            REQUEST_CHECK_SETTINGS = 100,
-            REQUEST_LOCATION_PERMISSION = 10;
-
-//    private LocationRequester locationRequester;
+    private static final int REQUEST_LOCATION_PERMISSION = 10;
 
     private GoogleMap mMap;
     private Marker currentMapMarker;
     private Button confirmLocationBtn;
     private ProgressDialogFragment progressDialogFragment;
+    private LocationRequester locationRequester;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,10 +79,13 @@ public class RestaurantLocationActivity extends AppCompatActivity
 
         if(v.getId() == confirmLocationBtn.getId()){
 
-            final Intent intent = new Intent();
-            intent.putExtra("chosenLatLng", currentMapMarker.getPosition());
-            setResult(RESULT_OK, intent);
-            finish();
+//            final Intent intent = new Intent();
+//            intent.putExtra("chosenLatLng", currentMapMarker.getPosition());
+//            setResult(RESULT_OK, intent);
+//            finish();
+            GeocoderUtil.getLocationAddress(this,currentMapMarker.getPosition());
+
+            Log.d("ttt","current location is: "+currentMapMarker.getPosition());
 
         }
 
@@ -102,7 +105,7 @@ public class RestaurantLocationActivity extends AppCompatActivity
 
         } else {
 
-//            showProgressDialog();
+            showProgressDialog();
 
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -113,29 +116,79 @@ public class RestaurantLocationActivity extends AppCompatActivity
 
     }
 
-    private void showProgressDialog() {
-        sweetAlertDialog = new
-                SweetAlertDialog(MapsActivity.this, SweetAlertDialog.PROGRESS_TYPE);
 
-        sweetAlertDialog.show();
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                showProgressDialog();
+
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+                initializeLocationRequester();
+
+            } else {
+
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+                LatLng sydney = new LatLng(-34, 151);
+                currentMapMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Restaurant Location"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+            }
+        }
+
+    }
+
+    private void showProgressDialog() {
+        progressDialogFragment = new ProgressDialogFragment();
+        progressDialogFragment.show(getSupportFragmentManager(),"progress");
     }
 
 
     private void initializeLocationRequester() {
-//        locationRequester = new LocationRequester(this);
-//        locationRequester.getCurrentLocation();
+        locationRequester = new LocationRequester(this);
+        locationRequester.getCurrentLocation();
     }
 
 
     public void markCurrentLocation(Location location) {
 
+        progressDialogFragment.dismiss();
 //        sweetAlertDialog.dismiss();
 
         LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-        currentMapMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Delivery location"));
+        currentMapMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Restaurant Location"));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
 
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (locationRequester != null) {
+            locationRequester.resumeLocationUpdates();
+        }
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (locationRequester != null) {
+            locationRequester.stopLocationUpdates();
+        }
+    }
+
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.developers.wajbaty.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ public class ProgressDialogFragment extends DialogFragment {
     private String title;
     private String message;
 
+
     public ProgressDialogFragment(){
     }
 
@@ -26,6 +28,7 @@ public class ProgressDialogFragment extends DialogFragment {
 
 
     public ProgressDialogFragment(String title,String message){
+            this.title = title;
             this.message = message;
     }
 
@@ -60,7 +63,6 @@ public class ProgressDialogFragment extends DialogFragment {
 
         return view;
     }
-
 
 
     @Override

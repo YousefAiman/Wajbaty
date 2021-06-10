@@ -56,6 +56,9 @@ dependencies {
     //location
     implementation 'com.google.android.gms:play-services-location:18.0.0'
 
+    //utility
+    implementation 'com.android.volley:volley:1.2.0'
+
 
     //test
     testImplementation 'junit:junit:'

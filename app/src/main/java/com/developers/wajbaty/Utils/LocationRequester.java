@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.developers.wajbaty.PartneredRestaurant.Activities.RestaurantLocationActivity;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -103,7 +104,7 @@ public class LocationRequester {
                         } else {
 
                             Log.d("ttt", "last known location: " + location);
-//                            ((MapsActivity) activity).markCurrentLocation(location);
+                            ((RestaurantLocationActivity) activity).markCurrentLocation(location);
 
 
                         }
@@ -167,7 +168,7 @@ public class LocationRequester {
 
                         Log.d("ttt", "location result is not null");
 
-//                        ((MapsActivity) activity).markCurrentLocation(location);
+                        ((RestaurantLocationActivity) activity).markCurrentLocation(location);
 
                         stopLocationUpdates();
 
