@@ -3,5 +3,8 @@
 
     <string name="app_name">وجبتنا</string>
     <string name="title_activity_maps">Map</string>
+    <string name="create_an_account">إنشاء حساب</string>
+    <string name="sign_in">تسجيل دخول</string>
+    <string name="continue_as_guest">الدخول كضيف</string>
 
 </resources>
