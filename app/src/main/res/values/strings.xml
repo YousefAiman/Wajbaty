@@ -1,10 +1,5 @@
 <resources>
-
-
-
-    <string name="app_name">Wajbaitna</string>
-
-
-
+    <string name="title_activity_maps">Map</string>
+    <string name="app_name">Wajbitna</string>
 
 </resources>
