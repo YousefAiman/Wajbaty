@@ -55,6 +55,9 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.2.2'
     implementation 'androidx.navigation:navigation-ui:2.2.2'
 
+    //location
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+
 
     //test
     testImplementation 'junit:junit:'
