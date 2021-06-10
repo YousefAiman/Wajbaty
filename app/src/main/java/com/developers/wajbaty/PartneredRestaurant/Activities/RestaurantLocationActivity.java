@@ -6,13 +6,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.developers.wajbaty.Fragments.ProgressDialogFragment;
 import com.developers.wajbaty.R;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -33,7 +36,7 @@ public class RestaurantLocationActivity extends AppCompatActivity
     private GoogleMap mMap;
     private Marker currentMapMarker;
     private Button confirmLocationBtn;
-
+    private ProgressDialogFragment progressDialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,10 +113,29 @@ public class RestaurantLocationActivity extends AppCompatActivity
 
     }
 
+    private void showProgressDialog() {
+        sweetAlertDialog = new
+                SweetAlertDialog(MapsActivity.this, SweetAlertDialog.PROGRESS_TYPE);
+
+        sweetAlertDialog.show();
+    }
+
+
     private void initializeLocationRequester() {
 //        locationRequester = new LocationRequester(this);
 //        locationRequester.getCurrentLocation();
     }
 
+
+    public void markCurrentLocation(Location location) {
+
+//        sweetAlertDialog.dismiss();
+
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        currentMapMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Delivery location"));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+
+    }
 
 }

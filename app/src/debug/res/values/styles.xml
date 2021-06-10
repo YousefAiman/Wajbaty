@@ -1,0 +1,8 @@
+<resources>
+
+    <style name="progressBarOrange" parent="@style/Theme.Wajbaty">
+        <item name="colorAccent">@color/orange</item>
+    </style>
+
+
+</resources>
