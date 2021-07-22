@@ -1,11 +1,5 @@
 <resources>
 
-    <style name="progressBarOrange" parent="@style/Theme.Wajbaty">
-        <item name="colorAccent">@color/orange</item>
-    </style>
 
-    <style name="LoginTextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/text_input_selector</item>
-    </style>
 
 </resources>

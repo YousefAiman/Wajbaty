@@ -17,6 +17,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -28,16 +29,18 @@ public class LocationRequester {
     private LocationCallback locationCallback;
     private boolean mRequestingLocationUpdates;
     private final Activity activity;
+    private final LocationRequestAction locationRequestAction;
 
-    public LocationRequester(Activity activity) {
+    public interface LocationRequestAction{
+        void locationFetched(LatLng latLng);
+    }
+
+    public LocationRequester(Activity activity,LocationRequestAction locationRequestAction) {
         this.activity = activity;
+        this.locationRequestAction = locationRequestAction;
     }
 
 
-    private void checkLocationSettings() {
-
-
-    }
 
     @SuppressLint("MissingPermission")
     public void getCurrentLocation() {
@@ -104,8 +107,9 @@ public class LocationRequester {
                         } else {
 
                             Log.d("ttt", "last known location: " + location);
-                            ((RestaurantLocationActivity) activity).markCurrentLocation(location);
 
+                            locationRequestAction.locationFetched(new LatLng(location.getLatitude(),
+                                    location.getLongitude()));
 
                         }
 
@@ -168,7 +172,7 @@ public class LocationRequester {
 
                         Log.d("ttt", "location result is not null");
 
-                        ((RestaurantLocationActivity) activity).markCurrentLocation(location);
+                        locationRequestAction.locationFetched(new LatLng(location.getLatitude(),location.getLongitude()));
 
                         stopLocationUpdates();
 

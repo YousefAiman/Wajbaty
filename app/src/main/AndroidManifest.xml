@@ -3,8 +3,12 @@
     package="com.developers.wajbaty">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
 
     <application
         android:allowBackup="true"
@@ -13,11 +17,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Wajbaty">
-        <activity android:name=".Activities.RegisterActivity"></activity>
+        <activity android:name=".Customer.Activities.DeliveryLocationMapActivity" />
+        <activity android:name=".Customer.Activities.CategoryActivity" />
+        <activity android:name=".PartneredRestaurant.Activities.DiscountOfferActivity" />
+        <activity android:name=".Customer.Activities.FavoriteActivity" />
+        <activity android:name=".Activities.HomeActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.MenuItemActivity" />
+        <activity android:name=".Customer.Activities.CartActivity" />
+        <activity android:name=".Activities.TestAcitivty" />
+        <activity android:name=".PartneredRestaurant.Activities.MenuItemModifierActivity" />
+        <activity android:name=".PartneredRestaurant.Activities.RestaurantActivity" />
+        <activity android:name=".PartneredRestaurant.Activities.RestaurantScheduleActivity" />
+        <activity android:name=".PartneredRestaurant.Activities.RestaurantInfoActivity" />
+        <activity android:name=".PartneredRestaurant.Activities.RestaurantMediaFillingActivity" />
+        <activity android:name=".Activities.RegisterActivity" />
         <activity android:name=".Activities.WelcomeActivity" />
         <activity android:name=".PartneredRestaurant.Activities.RestaurantLocationActivity" />
-
-
         <activity android:name=".Activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,8 +54,26 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".Activities.MapsActivity"
             android:label="@string/title_activity_maps" />
+
+
+<!--        <service-->
+<!--            android:name="MyNavigationService"-->
+<!--            android:foregroundServiceType="location">-->
+<!--        &lt;!&ndash; Any inner elements would go here. &ndash;&gt;-->
+<!--    </service>-->
+
+        <service
+            android:name=".Services.MyFirebaseMessaging"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+
     </application>
 
 </manifest>
