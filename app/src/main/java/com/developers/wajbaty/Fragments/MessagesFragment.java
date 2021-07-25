@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class MessagesFragment extends Fragment implements MessagingUserAdapter.MessagingUserListener{
+public class MessagesFragment extends Fragment implements MessagingUserAdapter.MessagingUserListener {
 
     private final static int PAGINATION = 5;
     private String currentUserUid;
