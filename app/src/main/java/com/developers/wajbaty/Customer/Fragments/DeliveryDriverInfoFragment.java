@@ -1,5 +1,6 @@
 package com.developers.wajbaty.Customer.Fragments;
 
+import android.app.Dialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -70,6 +71,13 @@ public class DeliveryDriverInfoFragment extends DialogFragment implements View.O
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        requireDialog().getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -113,10 +121,12 @@ public class DeliveryDriverInfoFragment extends DialogFragment implements View.O
 
         if(v.getId() == deliveryDriverStartDeliveryBtn.getId()){
 
+            dismiss();
             deliveryListener.startDelivery();
 
         }else if(v.getId() == deliveryDriverCancelDeliveryBtn.getId()){
 
+            dismiss();
             deliveryListener.cancelDelivery();
 
         }

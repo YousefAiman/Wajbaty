@@ -120,7 +120,7 @@ public class RestaurantMenuFragment extends Fragment implements View.OnClickList
     public static RestaurantMenuFragment newInstance(PartneredRestaurant restaurant,ArrayList<String> likedMenuItems,String currency) {
         RestaurantMenuFragment fragment = new RestaurantMenuFragment();
         Bundle args = new Bundle();
-        args.putSerializable(RESTAURANT, (Serializable) restaurant);
+        args.putSerializable(RESTAURANT, restaurant);
         if(likedMenuItems != null){
             args.putStringArrayList(LIKED_LIST, likedMenuItems);
         }

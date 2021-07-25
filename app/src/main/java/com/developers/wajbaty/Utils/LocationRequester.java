@@ -1,13 +1,20 @@
 package com.developers.wajbaty.Utils;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.developers.wajbaty.PartneredRestaurant.Activities.RestaurantLocationActivity;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -20,6 +27,8 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.Map;
 
 public class LocationRequester {
 
@@ -185,6 +194,39 @@ public class LocationRequester {
         };
 
     }
+
+    public static boolean areLocationPermissionsEnabled(Context context){
+
+        boolean permissionsGranted;
+
+        @SuppressLint("InlinedApi") final String[] permissions = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        };
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+
+            permissionsGranted = checkPermissionGranted(permissions[0],context) &&
+                    checkPermissionGranted(permissions[1],context) &&
+                    checkPermissionGranted(permissions[2],context);
+
+        } else {
+
+            permissionsGranted = checkPermissionGranted(permissions[0],context) &&
+                    checkPermissionGranted(permissions[1],context);
+        }
+
+        Log.d("ttt","permissions granted: "+permissionsGranted);
+
+        return permissionsGranted;
+    }
+
+
+    private static boolean checkPermissionGranted(String permission,Context context){
+        return ContextCompat.checkSelfPermission(context,permission) == PackageManager.PERMISSION_GRANTED;
+    }
+
 
 
 }

@@ -39,11 +39,14 @@ import com.developers.wajbaty.Customer.Activities.FavoriteActivity;
 import com.developers.wajbaty.Customer.Fragments.HomeFragment;
 import com.developers.wajbaty.Customer.Fragments.NearbyRestaurantsFragment;
 import com.developers.wajbaty.DeliveryDriver.Fragments.DriverDeliveriesFragment;
+import com.developers.wajbaty.Fragments.MessagesFragment;
 import com.developers.wajbaty.Models.User;
 import com.developers.wajbaty.PartneredRestaurant.Activities.RestaurantActivity;
 import com.developers.wajbaty.R;
 import com.developers.wajbaty.Services.MyFirebaseMessaging;
 import com.developers.wajbaty.Utils.GlobalVariables;
+import com.developers.wajbaty.Utils.LocationListenerUtil;
+import com.developers.wajbaty.Utils.LocationRequester;
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -72,7 +75,8 @@ import java.util.Map;
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener,
-        LocationListener {
+        LocationListenerUtil.LocationChangeObserver
+{
 
     private static final int
             REQUEST_CHECK_SETTINGS = 100,
@@ -205,23 +209,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
         };
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
 
-            permissionsGranted = checkPermissionGranted(permissions[0]) &&
-                    checkPermissionGranted(permissions[1]) &&
-                    checkPermissionGranted(permissions[2]);
+        if (LocationRequester.areLocationPermissionsEnabled(this)) {
 
-        } else {
+            LocationListenerUtil.getInstance().addLocationChangeObserver(this);
+            LocationListenerUtil.getInstance().startListening(this);
 
-            permissionsGranted = checkPermissionGranted(permissions[0]) &&
-                    checkPermissionGranted(permissions[1]);
-        }
 
-        Log.d("ttt","permissions granted: "+permissionsGranted);
-
-        if (permissionsGranted) {
-
-            checkLocationSettings();
+//            checkLocationSettings();
 
         } else {
 
@@ -241,7 +236,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                             }
 
                             if (allAccepted) {
-                                checkLocationSettings();
+                                LocationListenerUtil.getInstance().addLocationChangeObserver(HomeActivity.this);
+                                LocationListenerUtil.getInstance().startListening(HomeActivity.this);
                             }
                         }
                     });
@@ -276,16 +272,20 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
         if (itemId == R.id.show_Messages_action) {
 
+            replaceFragment(new MessagesFragment());
 
             return true;
         } else if (itemId == R.id.show_restaurant_action) {
 
             return true;
 
-        } else if (itemId == R.id.show_restaurants_action) {
+        }
+//        else if (itemId == R.id.show_restaurants_action) {
+//
+//            return true;
+//        }
 
-            return true;
-        } else if (itemId == R.id.show_home_action) {
+        else if (itemId == R.id.show_home_action) {
 
             if (homeBottomNavigationView.getSelectedItemId() != R.id.show_home_action) {
                 replaceFragment(HomeFragment.newInstance(addressMap));
@@ -381,10 +381,156 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         }
     }
 
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
+//    @Override
+//    public Location onLocationChanged(@NonNull Location location) {
+//
+//        Log.d("ttt","lat: "+location.getLatitude()+" lng:"+
+//                location.getLongitude());
+//
+//
+//        if(currentLocation == null){
+//            Log.d("ttt","currentLocation == null");
+//            currentGeoHash = GeoFireUtils.getGeoHashForLocation(
+//                    new GeoLocation(location.getLatitude(), location.getLongitude()));
+//        }
+//
+//
+//        if (currentLocation != null &&
+//                currentLocation.distanceTo(location) < MIN_UPDATE_DISTANCE) {
+//            return null;
+//        }
+//
+//        Log.d("ttt", "new location is: " +
+//                location.getLatitude() + "-" + location.getLongitude());
+//
+//
+//        driverRef.update(
+//                "currentGeoPoint",
+//                new GeoPoint( location.getLatitude(), location.getLongitude())).addOnSuccessListener(new OnSuccessListener<Void>() {
+//            @Override
+//            public void onSuccess(Void aVoid) {
+//
+//                Log.d("ttt","updated driver location");
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//
+//                Log.d("ttt",e.getMessage());
+//
+//            }
+//        });
+//
+//
+//        String hash = GeoFireUtils.getGeoHashForLocation(
+//                new GeoLocation(location.getLatitude(), location.getLongitude()));
+//
+//        Log.d("ttt","currentGeoHash: "+currentGeoHash);
+//        Log.d("ttt","new hash: "+hash);
+//
+//
+//        if(!hash.equals(currentGeoHash)){
+//
+//            currentGeoHash = hash;
+//
+//            driverRef.update("geohash",hash).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                @Override
+//                public void onSuccess(Void aVoid) {
+//
+//                    Log.d("ttt","updated driver geohash");
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//
+//                    Log.d("ttt",e.getMessage());
+//
+//                }
+//            });
+//        }
+//
+//
+//        currentLocation = location;
+//
+//    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        if (requestingLocationUpdates) {
+//            startLocationUpdates();
+//        }
+//
+//    }
+//
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        stopLocationUpdates();
+//    }
 
-        Log.d("ttt","lat: "+location.getLatitude()+" lng:"+
+//    private void startLocationUpdates() {
+//
+//        fusedLocationClient.requestLocationUpdates(locationRequest,
+//                locationCallback,
+//                Looper.getMainLooper());
+//
+//    }
+
+//    private void stopLocationUpdates() {
+//        fusedLocationClient.removeLocationUpdates(locationCallback);
+//    }
+
+//    private void checkLocationSettings() {
+//
+//        final LocationRequest locationRequest = LocationRequest.create().
+//                setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+//                .setInterval(10000).setFastestInterval(5000);
+//
+//        final LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+//                .addLocationRequest(locationRequest);
+//
+//        LocationServices.getSettingsClient(this)
+//                .checkLocationSettings(builder.build())
+//                .addOnSuccessListener(locationSettingsResponse -> {
+//                    Log.d("ttt", "location is enabled");
+//
+//                    LocationManager locationManager = (LocationManager)
+//                            getSystemService(Context.LOCATION_SERVICE);
+//
+//                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+//                            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                        checkAndRequestPermissions();
+//                        return;
+//                    }
+//
+//                    locationManager.requestLocationUpdates(
+//                            LocationManager.GPS_PROVIDER,
+//                            5000,
+//                            10,
+//                            HomeActivity.this);
+//
+//                }).addOnFailureListener(e -> {
+//            if (e instanceof ResolvableApiException) {
+//                Log.d("ttt", "location is not enabled");
+//                try {
+//                    // Show the dialog by calling startResolutionForResult(),
+//                    // and check the result in onActivityResult().
+//                    ResolvableApiException resolvable = (ResolvableApiException) e;
+//                    resolvable.startResolutionForResult(HomeActivity.this,
+//                            REQUEST_CHECK_SETTINGS);
+//                } catch (IntentSender.SendIntentException sendEx) {
+//                    // Ignore the error.
+//                }
+//            }
+//        });
+//
+//    }
+
+    @Override
+    public void notifyObservers(Location location) {
+
+                Log.d("ttt","lat: "+location.getLatitude()+" lng:"+
                 location.getLongitude());
 
 
@@ -454,104 +600,26 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     }
 
+//
 //    @Override
-//    protected void onResume() {
-//        super.onResume();
+//    public void onProviderDisabled(@NonNull String provider) {
 //
-//        if (requestingLocationUpdates) {
-//            startLocationUpdates();
-//        }
-//
+//        Log.d("ttt","provider disabled: "+provider);
 //    }
 //
 //    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        stopLocationUpdates();
-//    }
-
-//    private void startLocationUpdates() {
+//    public void onProviderEnabled(@NonNull String provider) {
 //
-//        fusedLocationClient.requestLocationUpdates(locationRequest,
-//                locationCallback,
-//                Looper.getMainLooper());
+//        Log.d("ttt","provider enabled: "+provider);
 //
 //    }
-
-//    private void stopLocationUpdates() {
-//        fusedLocationClient.removeLocationUpdates(locationCallback);
+//
+//    @Override
+//    public void onStatusChanged(String provider, int status, Bundle extras) {
+//
+//        Log.d("ttt","status changed for provider: "+provider + " to: "+
+//                status);
+//
+//
 //    }
-
-    private void checkLocationSettings() {
-
-        final LocationRequest locationRequest = LocationRequest.create().
-                setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-                .setInterval(10000).setFastestInterval(5000);
-
-        final LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-
-        LocationServices.getSettingsClient(this)
-                .checkLocationSettings(builder.build())
-                .addOnSuccessListener(locationSettingsResponse -> {
-                    Log.d("ttt", "location is enabled");
-
-                    LocationManager locationManager = (LocationManager)
-                            getSystemService(Context.LOCATION_SERVICE);
-
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        checkAndRequestPermissions();
-                        return;
-                    }
-
-                    locationManager.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER,
-                            5000,
-                            10,
-                            HomeActivity.this);
-
-                }).addOnFailureListener(e -> {
-            if (e instanceof ResolvableApiException) {
-                Log.d("ttt", "location is not enabled");
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    ResolvableApiException resolvable = (ResolvableApiException) e;
-                    resolvable.startResolutionForResult(HomeActivity.this,
-                            REQUEST_CHECK_SETTINGS);
-                } catch (IntentSender.SendIntentException sendEx) {
-                    // Ignore the error.
-                }
-            }
-        });
-
-    }
-
-    private boolean checkPermissionGranted(String permission){
-        return ContextCompat.checkSelfPermission(this,permission) == PackageManager.PERMISSION_GRANTED;
-    }
-
-
-    @Override
-    public void onProviderDisabled(@NonNull String provider) {
-
-        Log.d("ttt","provider disabled: "+provider);
-    }
-
-    @Override
-    public void onProviderEnabled(@NonNull String provider) {
-
-        Log.d("ttt","provider enabled: "+provider);
-
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        Log.d("ttt","status changed for provider: "+provider + " to: "+
-                status);
-
-
-    }
 }

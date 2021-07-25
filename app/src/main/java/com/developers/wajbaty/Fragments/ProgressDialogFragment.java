@@ -1,6 +1,7 @@
 package com.developers.wajbaty.Fragments;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
@@ -25,11 +26,17 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        requireDialog().getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-
 
         View view;
 

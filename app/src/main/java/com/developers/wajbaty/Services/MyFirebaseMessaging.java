@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
@@ -18,9 +19,14 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.developers.wajbaty.BroadcastReceivers.NotificationClickReceiver;
+import com.developers.wajbaty.BroadcastReceivers.NotificationDeleteListener;
+import com.developers.wajbaty.DeliveryDriver.Activities.DeliveryInfoActivity;
 import com.developers.wajbaty.R;
 import com.developers.wajbaty.Utils.BadgeUtil;
 import com.developers.wajbaty.Utils.CloudMessagingNotificationsSender;
+import com.developers.wajbaty.Utils.GlobalVariables;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -36,17 +42,16 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
     private String currentUID;
     private NotificationManager notificationManager;
     private int notificationNum;
+    private SharedPreferences sharedPreferences;
 
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
 
         if(FirebaseAuth.getInstance().getCurrentUser()!=null){
-
             FirebaseFirestore.getInstance().collection("Users").document(
                     FirebaseAuth.getInstance().getCurrentUser().getUid())
                     .update("cloudMessagingToken",s);
-
         }
 
     }
@@ -69,14 +74,37 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
             currentUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
 
-
         if (notificationManager == null) {
             notificationManager = (NotificationManager)
                     getSystemService(Context.NOTIFICATION_SERVICE);
         }
 
+        if (sharedPreferences == null) {
+            sharedPreferences = getSharedPreferences("Wajbaty", Context.MODE_PRIVATE);
+        }
+
         try {
-            sendNotification(remoteMessage);
+
+            final CloudMessagingNotificationsSender.Data data = new CloudMessagingNotificationsSender.Data(remoteMessage.getData());
+
+            if (sharedPreferences.contains("currentMessagingUserId")) {
+
+                if (data.getSenderID()
+                        .equals(sharedPreferences.getString("currentMessagingUserId", "")) &&
+                        Long.parseLong(data.getDestinationID()) ==
+                                sharedPreferences.getLong("currentMessagingDeliveryID", 0)) {
+
+                    if (sharedPreferences.contains("isPaused") &&
+                            sharedPreferences.getBoolean("isPaused", false)) {
+                        sendNotification(data);
+                    }
+                } else {
+                    sendNotification(data);
+                }
+            } else {
+                sendNotification(data);
+            }
+
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -84,16 +112,13 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
     }
 
 
-    public void sendNotification(RemoteMessage remoteMessage) throws ExecutionException, InterruptedException {
-
-        final CloudMessagingNotificationsSender.Data data = new CloudMessagingNotificationsSender.Data(remoteMessage.getData());
+    public void sendNotification(CloudMessagingNotificationsSender.Data data) throws ExecutionException, InterruptedException {
 
         String type = String.valueOf(data.getType());
         createChannel(type);
 
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,type)
-                .setSmallIcon(R.drawable.logo)
+                .setSmallIcon(R.drawable.app_logo_round_icon)
                 .setContentTitle(data.getTitle())
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setContentText(data.getBody())
@@ -119,18 +144,110 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
 
         builder.setGroup(type);
 
+        if (GlobalVariables.getMessagesNotificationMap() == null)
+            GlobalVariables.setMessagesNotificationMap(new HashMap<>());
+
+        final String identifierTitle = data.getSenderID() + type + data.getDestinationID();
+
+        builder.setDeleteIntent(
+                PendingIntent.getBroadcast(this, notificationNum,
+                        new Intent(this, NotificationDeleteListener.class)
+                                .putExtra("notificationIdentifierTitle", identifierTitle)
+                        , PendingIntent.FLAG_UPDATE_CURRENT));
+
 
         NotificationManagerCompat manager = NotificationManagerCompat.from(this);
-        manager.notify(notificationNum, builder.build());
 
-        notificationNum++;
+        PendingIntent pendingIntent;
 
-        if (Build.VERSION.SDK_INT < 26) {
-            BadgeUtil.incrementBadgeNum(this);
+        if(data.getType() == CloudMessagingNotificationsSender.Data.TYPE_DELIVERY_REQUEST){
+
+            Intent deliveryIntent = new Intent(this, DeliveryInfoActivity.class);
+            deliveryIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            deliveryIntent.putExtra("deliveryID",data.getDestinationID());
+
+             pendingIntent = PendingIntent.getBroadcast(this,notificationNum,
+                     deliveryIntent,PendingIntent.FLAG_ONE_SHOT);
+
+                builder.setContentIntent(pendingIntent);
+
+
+            if (Build.VERSION.SDK_INT < 26) {
+                BadgeUtil.incrementBadgeNum(this);
+            }
+
+
+            notificationNum++;
+
+            GlobalVariables.getMessagesNotificationMap().put(identifierTitle, notificationNum);
+            updateNotificationSent(data.getSenderID(), data.getDestinationID(), data.getType());
+
+            manager.notify(notificationNum, builder.build());
+
+
+        }else if(data.getType() == CloudMessagingNotificationsSender.Data.TYPE_MESSAGE){
+
+
+            final Intent newIntent = new Intent(this, NotificationClickReceiver.class);
+            newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            final Bundle messagingBundle = new Bundle();
+            messagingBundle.putString("messagingUID", data.getSenderID());
+            messagingBundle.putString("destinationUID",data.getDestinationID());
+            newIntent.putExtra("messagingBundle", messagingBundle);
+
+            pendingIntent = PendingIntent
+                    .getBroadcast(this, notificationNum, newIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+
+            builder.setContentIntent(pendingIntent);
+
+            if (!GlobalVariables.getMessagesNotificationMap().containsKey(identifierTitle)) {
+                notificationNum++;
+
+                GlobalVariables.getMessagesNotificationMap().put(identifierTitle, notificationNum);
+                Log.d("ttt", "this notification doesn't exist so building");
+
+                manager.notify(notificationNum, builder.build());
+                updateNotificationSent(data.getSenderID(), data.getDestinationID(), data.getType());
+
+                if (Build.VERSION.SDK_INT < 26) {
+                    BadgeUtil.incrementBadgeNum(this);
+                }
+
+            } else {
+                Log.d("ttt", "this notification already exists just updating");
+                manager.notify(GlobalVariables.getMessagesNotificationMap().get(identifierTitle)
+                        , builder.build());
+            }
+
         }
-
-
     }
+
+    void updateNotificationSent(String user, String destinationId, int type) {
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null)
+            return;
+
+        String currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Log.d("ttt", "current user id: " + currentUid + " user: " + user + " promoid: " + destinationId + " type: " + type);
+
+        FirebaseFirestore.getInstance().collection("Notifications")
+                .whereEqualTo("receiverId", currentUid).whereEqualTo("senderId", user)
+                .whereEqualTo("destinationId", destinationId).whereEqualTo("type", type).get()
+                .addOnSuccessListener(snapshots -> {
+                    if (!snapshots.isEmpty()) {
+                        Log.d("ttt", "found this notificaiton and updating it to sent");
+                        snapshots.getDocuments().get(0).getReference().update("sent", true);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("ttt", "failed because: " + e.getMessage());
+            }
+        });
+    }
+
 
     public void createChannel(String channelId) {
         if (Build.VERSION.SDK_INT >= 26) {

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".Activities.WelcomeActivity">
 
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/create_acc_btn"
         android:layout_width="0dp"

@@ -1,11 +1,16 @@
 package com.developers.wajbaty.Models;
 
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.developers.wajbaty.Customer.Fragments.DeliveryDriverInfoFragment;
+import com.developers.wajbaty.DeliveryDriver.Activities.DeliveryInfoActivity;
+import com.developers.wajbaty.DeliveryDriver.Activities.DriverDeliveryMapActivity;
 import com.developers.wajbaty.Models.offer.DiscountOffer;
 import com.developers.wajbaty.Models.offer.Offer;
 import com.developers.wajbaty.Utils.CloudMessagingNotificationsSender;
@@ -22,6 +27,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -38,7 +44,9 @@ public class DeliveryModel extends Observable {
     public static final int DELIVERY_REQUEST_SUCCESS = 1,DELIVERY_REQUEST_FAILED = 2,
         DELIVERY_DRIVER_NOT_FOUND = 3,
         DELIVERY_DRIVERS_NOTIFIED = 4,
-        DELIVERY_DRIVER_ACCEPTED_DELIVERY = 5;
+        DELIVERY_DRIVER_ACCEPTED_DELIVERY = 5,
+            DRIVER_DELIVERY_REQUEST = 6,DRIVER_DELIVERY_REQUEST_ACCEPTED = 7
+            ,RIVER_DELIVERY_REQUEST_DENIED = 8;
 
     private final Delivery delivery;
     private final DocumentReference deliveryRef;
@@ -59,12 +67,12 @@ public class DeliveryModel extends Observable {
 
                 Log.d("ttt","delivery added");
 
-                final CollectionReference deliveryCartRef = deliveryRef.collection("Deliveries");
+                final CollectionReference deliveryCartRef = deliveryRef.collection("CartItems");
 
                 List<Task<?>> cartTasks = new ArrayList<>();
 
                 for(CartItem cartItem:cartItems){
-                    cartTasks.add(deliveryCartRef.add(cartItem));
+                    cartTasks.add(deliveryCartRef.document(cartItem.getItemId()).set(cartItem));
                 }
 
                 Tasks.whenAllSuccess(cartTasks).addOnSuccessListener(new OnSuccessListener<List<Object>>() {
@@ -92,15 +100,16 @@ public class DeliveryModel extends Observable {
     private void notifyDeliveryDrivers(HashMap<String,Object> locationMap){
 
         final GeoLocation center = new GeoLocation(
-                delivery.getDeliveryLocation().getLatitude(),
-                delivery.getDeliveryLocation().getLongitude());
+                delivery.getLat(),
+                delivery.getLng());
 
         final List<GeoQueryBounds> geoQueryBounds =
-                GeoFireUtils.getGeoHashQueryBounds(center, 100 * 1000);
+                GeoFireUtils.getGeoHashQueryBounds(center, 10 * 1000);
 
         final Query driversQuery =
                 firestore.collection("Users")
                         .whereEqualTo("countryCode", locationMap.get("countryCode"))
+                        .whereEqualTo("status",DeliveryDriver.STATUS_AVAILABLE)
                         .orderBy("geohash");
 
         List<Task<QuerySnapshot>> driverTasks = new ArrayList<>();
@@ -164,6 +173,8 @@ public class DeliveryModel extends Observable {
                         }
 
                         setChanged();
+
+
                         if(noResult){
                             notifyError(DELIVERY_DRIVER_NOT_FOUND,"No drivers found in your range");
                         }else{
@@ -268,17 +279,39 @@ public class DeliveryModel extends Observable {
 
                if(value!=null){
 
+                   if(value.contains("proposingDriverMap")) {
+
+                       HashMap<String, Object> proposingMap = (HashMap<String, Object>) value.get("proposingDriverMap");
+
+                       if (proposingMap == null) {
+                           return;
+                       }
+
+                       if(proposingMap.containsKey("driverID")){
+
+                           final HashMap<Integer,Object> driverDeliveryRequest = new HashMap<>();
+                           driverDeliveryRequest.put(DRIVER_DELIVERY_REQUEST,  proposingMap.get("driverID"));
+
+                           setChanged();
+                           notifyObservers(driverDeliveryRequest);
+
+                       }else{
+
+                       }
+
+                   }
+
                    if(value.contains("status") && value.getLong("status") == Delivery.STATUS_ACCEPTED){
 
                        delivery.setStatus(Delivery.STATUS_ACCEPTED);
 
-                       Delivery.InProgressDelivery inProgressDelivery =
-                               (Delivery.InProgressDelivery) delivery;
-
-                       inProgressDelivery.setDriverID(value.getString("driverID"));
-
-                        setChanged();
-                        notifyObservers(inProgressDelivery);
+//                       Delivery.InProgressDelivery inProgressDelivery =
+//                               (Delivery.InProgressDelivery) delivery;
+//
+//                       inProgressDelivery.setDriverID(value.getString("driverID"));
+//
+//                        setChanged();
+//                        notifyObservers(inProgressDelivery);
 
                    }
 
@@ -294,6 +327,84 @@ public class DeliveryModel extends Observable {
         resultMap.put(key,error);
         setChanged();
         notifyObservers(resultMap);
+    }
+
+
+    public void acceptDriverRequest(){
+
+        deliveryRef.update("proposingDriverMap.status",true)
+        .addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                firestore.collection("Users").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .update("currentDeliveryID",delivery.getID());
+            }
+        });
+
+
+
+//            String currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+//
+//        firestore.collection("Users").document(currentUid)
+//                .update("currentDeliveryId",delivery.getID())
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//
+//                        firestore.collection("Deliveries").document(delivery.getID())
+//                                .update("status",Delivery.STATUS_ACCEPTED,
+//                                        "driverID", currentUid)
+//                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                    @Override
+//                                    public void onSuccess(Void aVoid) {
+//
+//                                        setChanged();
+//                                        notifyObservers(DRIVER_DELIVERY_REQUEST_ACCEPTED);
+//
+//                                    }
+//                                }).addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//
+//                                hideProgressFragment();
+//
+//                                deliveryInfoStartDeliveryBtn.setClickable(true);
+//
+//                                setChanged();
+//                                notifyObservers(DRIVER_DELIVERY_REQUEST_ACCEPTED);
+//
+//
+//                                firestore.collection("DeliveryDrivers").document(currentUid)
+//                                        .update("currentDeliveryId",null);
+//
+//                            }
+//                        });
+//
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//
+//                hideProgressFragment();
+//                deliveryInfoStartDeliveryBtn.setClickable(true);
+//
+//            }
+//        });
+
+    }
+
+    public void refuseDriverRequest(){
+
+        deliveryRef.update("proposingDriverMap.status",false)
+        .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                deliveryRef.update("proposingDriverMap", FieldValue.delete());
+
+            }
+        });
+
     }
 
 }

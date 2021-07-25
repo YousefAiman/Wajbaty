@@ -105,7 +105,7 @@ public class CloudMessagingNotificationsSender {
 
     public static class Data {
 
-        public static final int TYPE_DELIVERY_REQUEST = 1;
+        public static final int TYPE_DELIVERY_REQUEST = 1,TYPE_MESSAGE = 2;
 
         private String senderID;
         private String title;

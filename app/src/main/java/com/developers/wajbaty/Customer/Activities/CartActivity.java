@@ -141,6 +141,14 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartC
                 }
 
                 cartTotalPriceTv.setText("Total Price: "+totalCost+"ILS");
+
+                if(snapshot.contains("currentDeliveryID") && snapshot.get("currentDeliveryID")!=null){
+
+                    cartOrderDeliveryBtn.setClickable(false);
+                    cartOrderDeliveryBtn.setBackgroundResource(R.drawable.filled_button_inactive_background);
+
+                }
+
             }
         });
 
@@ -170,7 +178,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartC
                     Log.d(TAG,"cart item id: "+snap.getId());
                     addedCartItemsIds.add(snap.getId());
                 }
-//                addedCartItemsIds
+
                 addedCartItems.addAll(snapshots.toObjects(CartItem.class));
 
                 lastDocSnap = snapshots.getDocuments().get(snapshots.size() - 1);
@@ -350,7 +358,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartC
 
         removeListeners.add(
         firestore.collection("MenuItems")
-                .whereIn("id",itemIds)
+                .whereIn("id", itemIds)
                 .whereEqualTo("isBeingRemoved",true)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -534,9 +542,42 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartC
 
         if(v.getId() == cartOrderDeliveryBtn.getId()){
 
-            startActivity(new Intent(this,DeliveryLocationMapActivity.class)
-            .putExtra("cartItems",(Serializable) cartItems)
-            .putExtra("addressMap",getIntent().getSerializableExtra("addressMap")));
+            Intent intent = new Intent(this,DeliveryLocationMapActivity.class)
+                    .putExtra("addressMap",getIntent().getSerializableExtra("addressMap"));
+
+            Query query = firestore.collection("Users")
+                    .document(currentUid).collection("Cart")
+                    .orderBy("timeAdded", Query.Direction.DESCENDING);
+
+            if(lastDocSnap!=null){
+                query.startAfter(lastDocSnap);
+            }
+
+               query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot snapshots) {
+
+                    if(snapshots!=null && !snapshots.isEmpty()){
+
+                        if(cartItems.isEmpty()){
+                            cartItems.addAll(snapshots.toObjects(CartItem.class));
+                        }else{
+                            cartItems.addAll(cartItems.size() - 1,snapshots.toObjects(CartItem.class));
+                        }
+
+                    }
+                }
+            }).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                    intent.putExtra("cartItems",cartItems);
+                    Log.d("ttt","cart items task completed");
+                    startActivity(intent);
+
+                }
+            });
+
 
         }
     }

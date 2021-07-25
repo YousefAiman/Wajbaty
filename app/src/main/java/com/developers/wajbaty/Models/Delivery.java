@@ -5,9 +5,9 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @IgnoreExtraProperties
 public class Delivery implements Serializable {
@@ -17,21 +17,56 @@ public class Delivery implements Serializable {
 
     private String ID;
     private String requesterID;
-    private HashMap<Float,String> menuItemPriceMap;
+    private HashMap<String,Float> menuItemPriceMap;
     private int status;
     private long orderTimeInMillis;
 
     private float totalCost;
+    private String currency;
     private String address;
-    private GeoPoint deliveryLocation;
+    private double lat;
+    private double lng;
     private String geohash;
 
+    private Map<String,Integer> restaurantMenuItemsMap;
 
     @Exclude private String userImageUrl;
     @Exclude private String userUsername;
 
 
     public Delivery() {
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public Map<String, Integer> getRestaurantMenuItemsMap() {
+        return restaurantMenuItemsMap;
+    }
+
+    public void setRestaurantMenuItemsMap(Map<String, Integer> restaurantMenuItemsMap) {
+        this.restaurantMenuItemsMap = restaurantMenuItemsMap;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 
 //    @IgnoreExtraProperties
@@ -118,16 +153,19 @@ public class Delivery implements Serializable {
         }
     }
 
-    public Delivery(String ID, String requesterID, HashMap<Float, String> menuItemPriceMap, int status, long orderTimeInMillis, float totalCost, String address, GeoPoint deliveryLocation, String geohash) {
+    public Delivery(String ID, String requesterID, HashMap<String, Float> menuItemPriceMap, int status, long orderTimeInMillis, float totalCost,String currency, String address, double lat,double lng, String geohash,Map<String,Integer> restaurantMenuItemsMap) {
         this.ID = ID;
         this.requesterID = requesterID;
         this.menuItemPriceMap = menuItemPriceMap;
         this.status = status;
         this.orderTimeInMillis = orderTimeInMillis;
         this.totalCost = totalCost;
+        this.setCurrency(currency);
         this.address = address;
-        this.deliveryLocation = deliveryLocation;
         this.geohash = geohash;
+        this.setLat(lat);
+        this.setLng(lng);
+        this.restaurantMenuItemsMap = restaurantMenuItemsMap;
     }
 
     public String getID() {
@@ -146,11 +184,11 @@ public class Delivery implements Serializable {
         this.requesterID = requesterID;
     }
 
-    public HashMap<Float, String> getMenuItemPriceMap() {
+    public HashMap<String, Float> getMenuItemPriceMap() {
         return menuItemPriceMap;
     }
 
-    public void setMenuItemPriceMap(HashMap<Float, String> menuItemPriceMap) {
+    public void setMenuItemPriceMap(HashMap<String, Float> menuItemPriceMap) {
         this.menuItemPriceMap = menuItemPriceMap;
     }
 
@@ -184,14 +222,6 @@ public class Delivery implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public GeoPoint getDeliveryLocation() {
-        return deliveryLocation;
-    }
-
-    public void setDeliveryLocation(GeoPoint deliveryLocation) {
-        this.deliveryLocation = deliveryLocation;
     }
 
     public String getGeohash() {

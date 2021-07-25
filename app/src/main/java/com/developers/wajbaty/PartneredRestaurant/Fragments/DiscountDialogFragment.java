@@ -87,6 +87,20 @@ public class DiscountDialogFragment extends DialogFragment implements View.OnCli
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        requireDialog().getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+//    @NonNull
+//    @Override
+//    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+//        requireDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT);
+//        return super.onCreateDialog(savedInstanceState);
+//    }
+
+    @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
