@@ -17,7 +17,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
 
         findViewById(R.id.create_acc_btn).setOnClickListener(this);
-        findViewById(R.id.signin_btn).setOnClickListener(this);
+        findViewById(R.id.sign_btn).setOnClickListener(this);
         findViewById(R.id.guest_btn).setOnClickListener(this);
 
     }
@@ -26,8 +26,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         if (v.getId() == R.id.create_acc_btn) {
             startActivity(new Intent(this, RegisterActivity.class));
-        } else if (v.getId() == R.id.signin_btn) {
-//            startActivity(new Intent(this, RegisterActivity.class));
+        } else if (v.getId() == R.id.sign_btn) {
+            startActivity(new Intent(this, SigninActivity.class));
         } else if (v.getId() == R.id.guest_btn) {
 //            startActivity(new Intent(this, RegisterActivity.class));
         }

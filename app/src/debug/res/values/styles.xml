@@ -8,4 +8,10 @@
         <item name="boxStrokeColor">@color/text_input_selector</item>
     </style>
 
+    <style name="noStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="background">@color/white</item>
+        <item name="boxStrokeColor">@color/white</item>
+    </style>
+
+
 </resources>
