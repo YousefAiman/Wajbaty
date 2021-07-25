@@ -52,7 +52,7 @@
         android:id="@+id/next_Im_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/btn_design"
+        android:background="@drawable/filled_button_background"
         android:backgroundTint="@color/orange"
         android:padding="16dp"
         android:text="@string/next"

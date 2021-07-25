@@ -30,7 +30,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:hint="@string/username"
+            android:hint="username"
             android:textColorHint="@color/black"
             app:counterMaxLength="15"
             app:layout_constraintEnd_toEndOf="parent"
@@ -52,7 +52,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:hint="@string/email"
+            android:hint="email"
             android:textColorHint="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -73,7 +73,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:hint="@string/password"
+            android:hint="password"
             android:textColorHint="@color/black"
             app:endIconMode="password_toggle"
             app:layout_constraintEnd_toEndOf="parent"
@@ -95,7 +95,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:hint="@string/confirm_password"
+            android:hint="confirm_password"
             android:textColorHint="#000000"
             app:endIconMode="password_toggle"
             app:layout_constraintEnd_toEndOf="parent"
@@ -139,7 +139,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
-                android:hint="@string/phone_number"
+                android:hint="phone number"
                 android:textColorHint="@color/black"
                 android:inputType="phone"
                 android:padding="16dp" />
@@ -172,7 +172,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="@string/register_as_a"
+            android:text="register as a"
             android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/radioGroup"
             app:layout_constraintEnd_toEndOf="parent"
@@ -199,7 +199,7 @@
                 android:buttonTint="@color/orange"
                 android:checked="true"
                 android:paddingEnd="30dp"
-                android:text="@string/customer" />
+                android:text="customer" />
 
             <androidx.appcompat.widget.AppCompatRadioButton
                 android:id="@+id/restaurantRadioButton"
@@ -209,7 +209,7 @@
                 android:buttonTint="@color/orange"
                 android:checked="true"
                 android:paddingEnd="30dp"
-                android:text="@string/restaurant"
+                android:text="restaurant"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
             <androidx.appcompat.widget.AppCompatRadioButton
@@ -219,7 +219,7 @@
                 android:layout_centerHorizontal="true"
                 android:checked="true"
                 android:paddingEnd="30dp"
-                android:text="@string/delivery"
+                android:text="delivery"
                 android:buttonTint="@color/orange"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
@@ -230,10 +230,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/btn_design"
+            android:background="@drawable/filled_button_background"
             android:backgroundTint="@color/orange"
             android:padding="16dp"
-            android:text="@string/create_account"
+            android:text="create account"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="20sp"
@@ -248,7 +248,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="@string/already_have_an_account_sign_in"
+            android:text="already have an account sign in"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

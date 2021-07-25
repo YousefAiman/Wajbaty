@@ -28,5 +28,6 @@
     <string name="meal_price">Meal Price</string>
     <string name="meal_ingredients">Meal Ingredients</string>
     <string name="add">Add</string>
+    <string name="add_your_picture">add your picture</string>
 
 </resources>

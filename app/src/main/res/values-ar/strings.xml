@@ -31,5 +31,6 @@
     <string name="meal_photos_guideline">صور الوجبة - يجب إضافة صورة واحدة على الأقل</string>
     <string name="meal_ingredients">مكونات الوجبة</string>
     <string name="add">اضافة</string>
+    <string name="add_your_picture">إضافة صورتك</string>
 
 </resources>
