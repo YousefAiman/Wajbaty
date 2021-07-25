@@ -20,8 +20,6 @@ import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartItemVH> {
 
-
-
   private final ArrayList<CartItem> cartItems;
   private static CartClickListener cartClickListener;
 
@@ -41,22 +39,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartItemVH> {
   @NonNull
   @Override
   public CartItemVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    return new CartItemVH(LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.item_cart_layout, parent, false));
+
+      return new CartItemVH(LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.item_cart_layout, parent, false));
+
   }
 
   @Override
   public void onBindViewHolder(@NonNull CartItemVH holder, int position) {
-    holder.bind(cartItems.get(position));
-  }
 
+      holder.bind(cartItems.get(position));
+
+  }
 
   @Override
   public int getItemCount() {
     return cartItems.size();
   }
 
-  public  class CartItemVH extends RecyclerView.ViewHolder implements View.OnClickListener {
+  public class CartItemVH extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private final ImageView cartItemImageIv,cartItemRemoveIv,cartItemPlusIv,cartItemMinusIv;
     private final TextView cartItemNameTv,cartItemPriceTv,cartItemCountTv;
@@ -119,4 +120,5 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartItemVH> {
 
     }
   }
+
 }

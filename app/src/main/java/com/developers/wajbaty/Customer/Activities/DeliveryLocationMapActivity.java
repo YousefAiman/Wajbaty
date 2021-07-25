@@ -18,6 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.developers.wajbaty.Customer.Fragments.DeliveryDriverInfoFragment;
+import com.developers.wajbaty.DeliveryDriver.Activities.DeliveryInfoActivity;
+import com.developers.wajbaty.DeliveryDriver.Activities.DriverDeliveryMapActivity;
 import com.developers.wajbaty.Fragments.ProgressDialogFragment;
 import com.developers.wajbaty.Models.CartItem;
 import com.developers.wajbaty.Models.Delivery;
@@ -87,6 +89,8 @@ public class DeliveryLocationMapActivity extends AppCompatActivity implements On
     private Button deliveryLocationConfirmBtn;
 
     private ProgressDialogFragment progressDialogFragment;
+
+    private Delivery currentDelivery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,7 +192,9 @@ public class DeliveryLocationMapActivity extends AppCompatActivity implements On
                 }
             }
 
-            final HashMap<Float, String> menuItemPriceMap = new HashMap<>();
+            final HashMap<String, Float> menuItemPriceMap = new HashMap<>();
+
+            final Map<String,Integer> restaurantMenuItemsMap = new HashMap<>();
 
             final float[] totalCost = {0};
 
@@ -204,32 +210,48 @@ public class DeliveryLocationMapActivity extends AppCompatActivity implements On
 
                                 totalCost[0] += price;
 
-                                menuItemPriceMap.put(price, snapshot.getId());
+                                menuItemPriceMap.put(snapshot.getId(), price);
+
+                                final String restaurantID = snapshot.getString("restaurantId");
+
+                                if(restaurantMenuItemsMap.containsKey(restaurantID)){
+
+                                    restaurantMenuItemsMap.put(restaurantID,
+                                            restaurantMenuItemsMap.get(restaurantID)+1);
+
+                                }else{
+                                    restaurantMenuItemsMap.put(restaurantID,1);
+                                }
+
                             }
                         }
                     }
 
+                    final GeoLocation chosenLocation = new GeoLocation(
+                            currentMapMarker.getPosition().latitude,
+                            currentMapMarker.getPosition().longitude);
+
+                     currentDelivery = new Delivery(
+                            ID,
+                            FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                            menuItemPriceMap,
+                            Delivery.STATUS_PENDING,
+                            System.currentTimeMillis(),
+                            totalCost[0],
+                            (String) addressMap.get("currency"),
+                            chosenAddress,
+                            chosenLocation.latitude,
+                            chosenLocation.longitude,
+                            GeoFireUtils.getGeoHashForLocation(chosenLocation),
+                            restaurantMenuItemsMap);
+
+                    model = new DeliveryModel(currentDelivery);
+                    model.addObserver(DeliveryLocationMapActivity.this);
+                    model.requestDelivery(addressMap,cartItemList);
+
                 }
             });
 
-            final GeoLocation chosenLocation = new GeoLocation(
-                    currentMapMarker.getPosition().latitude,
-                    currentMapMarker.getPosition().longitude
-            );
-
-            Delivery delivery = new Delivery(ID,
-                    FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                    menuItemPriceMap,
-                    Delivery.STATUS_PENDING,
-                    System.currentTimeMillis(),
-                    totalCost[0],
-                    chosenAddress,
-                    new GeoPoint(chosenLocation.latitude,chosenLocation.longitude),
-                    GeoFireUtils.getGeoHashForLocation(chosenLocation));
-
-            model = new DeliveryModel(delivery);
-            model.addObserver(this);
-            model.requestDelivery(addressMap,cartItemList);
 
         }
 
@@ -408,7 +430,8 @@ public class DeliveryLocationMapActivity extends AppCompatActivity implements On
 
 
     private void dismissProgressDialog(){
-        if(progressDialogFragment!=null){
+
+        if(progressDialogFragment != null && progressDialogFragment.isVisible()){
             progressDialogFragment.dismiss();
 
         }
@@ -432,35 +455,22 @@ public class DeliveryLocationMapActivity extends AppCompatActivity implements On
                    case DeliveryModel.DELIVERY_DRIVER_ACCEPTED_DELIVERY:
 
 
+                    break;
+
+                    case DeliveryModel.DRIVER_DELIVERY_REQUEST_ACCEPTED:
+
+                        dismissProgressDialog();
+
+                        startActivity(new Intent(this, DriverDeliveryMapActivity.class)
+                                .putExtra("delivery",currentDelivery));
 
                     break;
+
+
             }
 
         }else if(arg instanceof Delivery.InProgressDelivery){
 
-            Delivery.InProgressDelivery inProgressDelivery = (Delivery.InProgressDelivery) arg;
-
-            dismissProgressDialog();
-
-            DeliveryDriverInfoFragment.newInstance(inProgressDelivery.getDriverID(),
-                    new DeliveryDriverInfoFragment.DeliveryListener() {
-                        @Override
-                        public void startDelivery() {
-
-                            Toast.makeText(DeliveryLocationMapActivity.this,
-                                    "Delivery Started", Toast.LENGTH_SHORT).show();
-
-                        }
-
-                        @Override
-                        public void cancelDelivery() {
-
-                            Toast.makeText(DeliveryLocationMapActivity.this,
-                                    "Delivery Cancelled", Toast.LENGTH_SHORT).show();
-
-
-                        }
-                    }).show(getSupportFragmentManager(),"DeliveryDriverInfo");
 
 
 
@@ -474,10 +484,43 @@ public class DeliveryLocationMapActivity extends AppCompatActivity implements On
 
                 case DeliveryModel.DELIVERY_DRIVER_NOT_FOUND:
 
+
                     Toast.makeText(this,
                             "No Drivers Found currently!", Toast.LENGTH_SHORT).show();
 
                     dismissProgressDialog();
+
+                    break;
+
+            case DeliveryModel.DRIVER_DELIVERY_REQUEST:
+
+                final String driverID = (String) resultMap.get(key);
+
+            dismissProgressDialog();
+
+            DeliveryDriverInfoFragment.newInstance(driverID,
+                    new DeliveryDriverInfoFragment.DeliveryListener() {
+                        @Override
+                        public void startDelivery() {
+
+                            model.acceptDriverRequest();
+
+                            Toast.makeText(DeliveryLocationMapActivity.this,
+                                    "Delivery Started", Toast.LENGTH_SHORT).show();
+
+                        }
+
+                        @Override
+                        public void cancelDelivery() {
+
+                            model.refuseDriverRequest();
+
+                            Toast.makeText(DeliveryLocationMapActivity.this,
+                                    "Delivery Cancelled", Toast.LENGTH_SHORT).show();
+
+
+                        }
+                    }).show(getSupportFragmentManager(),"DeliveryDriverInfo");
 
                     break;
 

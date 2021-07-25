@@ -30,13 +30,22 @@ public class DriverDeliveriesAdapter extends RecyclerView.Adapter<DriverDeliveri
 
     private final ArrayList<Delivery> deliveries;
     private final CollectionReference customerRef;
-
     private final HashMap<String,String> userImageURLsMap,userUserNamesMap;
+    private static DriverDeliveriesListener driverDeliveriesListener;
 
-    public DriverDeliveriesAdapter(ArrayList<Delivery> deliveries) {
+
+    public interface DriverDeliveriesListener{
+
+        void onDeliveryClicked(int position);
+
+    }
+
+    public DriverDeliveriesAdapter(ArrayList<Delivery> deliveries,DriverDeliveriesListener driverDeliveriesListener) {
+
         this.deliveries = deliveries;
+        DriverDeliveriesAdapter.driverDeliveriesListener = driverDeliveriesListener;
 
-        customerRef = FirebaseFirestore.getInstance().collection("Customers");
+        customerRef = FirebaseFirestore.getInstance().collection("Users");
         userImageURLsMap = new HashMap<>();
         userUserNamesMap = new HashMap<>();
     }
@@ -88,7 +97,7 @@ public class DriverDeliveriesAdapter extends RecyclerView.Adapter<DriverDeliveri
 //        return TYPE_REQUESTED_DELIVERY;
 //    }
 
-    public class DeliveryRequestVH extends RecyclerView.ViewHolder{
+    public class DeliveryRequestVH extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final ImageView deliveryRequestUserImageIv;
         private final TextView deliveryRequestUserNameTv,
@@ -103,6 +112,7 @@ public class DriverDeliveriesAdapter extends RecyclerView.Adapter<DriverDeliveri
             deliveryRequestRequestedTimeTv = itemView.findViewById(R.id.deliveryRequestRequestedTimeTv);
             deliveryRequestAddressTv = itemView.findViewById(R.id.deliveryRequestAddressTv);
 
+            itemView.setOnClickListener(this);
         }
 
         private void bind(Delivery delivery){
@@ -125,6 +135,12 @@ public class DriverDeliveriesAdapter extends RecyclerView.Adapter<DriverDeliveri
 
         }
 
+        @Override
+        public void onClick(View v) {
+
+            driverDeliveriesListener.onDeliveryClicked(getAdapterPosition());
+
+        }
     }
 
 //    private class CurrentDeliveryVH extends RecyclerView.ViewHolder{
